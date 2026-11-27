@@ -6,7 +6,7 @@ $Key=(Resolve-Path -LiteralPath $Key).Path
 $name=[IO.Path]::GetFileName($File)
 if($name -notmatch '^[a-zA-Z0-9._-]+$' -or $name -in '.', '..'){throw 'Unsafe filename'}
 $nest="root@$Address"
-$dir='/media/scratch/puckos'
+$dir='/opt/puckos'
 $dest="$dir/$name"
 & ssh -T -i $Key $nest "mkdir -p $dir"
 if($LASTEXITCODE){throw 'Cannot create deployment directory'}
