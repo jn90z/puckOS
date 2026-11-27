@@ -16,7 +16,9 @@ jobs:
           arm-linux-gnueabihf-gcc -std=c11 -O2 -Wall -Wextra -march=armv7-a -mfpu=neon -mfloat-abi=hard -static apps/diagnostics/main.c -o dist/puckos-diagnostics
           file dist/puckos-diagnostics
           qemu-arm -cpu cortex-a9 dist/puckos-diagnostics --self-test
-          cd dist && sha256sum puckos-diagnostics > SHA256SUMS
+          arm-linux-gnueabihf-gcc -std=c11 -O2 -Wall -Wextra -march=armv7-a -mfpu=neon -mfloat-abi=hard -static -Isrc/hal apps/hardware-demo/main.c src/hal/*.c -lm -o dist/puckos-hardware-demo
+          qemu-arm -cpu cortex-a9 dist/puckos-hardware-demo --self-test
+          cd dist && sha256sum puckos-diagnostics puckos-hardware-demo > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: puckos-armv7
