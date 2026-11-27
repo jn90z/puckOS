@@ -6,7 +6,23 @@
 
 An experimental open-source embedded Linux platform for repurposing retired Nest Learning Thermostats into interactive gaming, lighting, home automation and utility devices.
 
-Formerly Google-Shun. Initial target: North American Nest Learning Thermostat, third generation, A0013 (diamond3). This is a research and planning project, not yet a working operating system or flashable release.
+Formerly Google-Shun. Initial target: North American Nest Learning Thermostat, third generation, A0013 (diamond3). PuckOS is an early working native-application prototype running on rooted stock Linux. It is not yet an independent operating system or flashable release.
+
+## Current status
+
+On US Gen 3 hardware (Display-3.7, firmware `6.2-27`), unfr0zen v0.6.0 enabled root access, USB console and SSH. Native ARMv7 diagnostics and a graphical color-wheel demo have run on physical hardware. LCD rendering, rotary input and button press/release events have been verified. The initial demo averaged 2.3 FPS; renderer optimization remains pending.
+
+- [Development and deployment instructions](docs/development.md)
+- [Firmware 6.2-27 hardware findings](docs/firmware/6.2-27.md)
+- [ARMv7 CI builds](https://github.com/jn90z/puckOS/actions)
+
+A 512 MiB NAND backup was created and its SHA256 verified, but the first 512 KiB read reported error -74. Full restoration has not been tested. Upstream acceptance of this firmware version is pending.
+
+## Acknowledgments
+
+PuckOS development on the original Nest hardware is made possible by [unfr0zen](https://github.com/unfr0zen/unfr0zen) and its contributors. Their recovery, firmware patching and root-access work provides the foundation for our native applications. We are grateful for their research and tooling and intend to contribute reproducible compatibility findings and relevant improvements upstream.
+
+PuckOS is an independent project, not affiliated with or endorsed by unfr0zen, Google or Nest. Original PuckOS code is MIT-licensed; unfr0zen is GPL-3.0-licensed and third-party components retain their respective licenses.
 
 ## Design goals
 
@@ -19,14 +35,14 @@ Formerly Google-Shun. Initial target: North American Nest Learning Thermostat, t
 
 ## Hardware reference
 
-The following is a preliminary third-generation reference, not a verified inventory of our particular unit. Regional and board revisions may differ.
+The table distinguishes observations on our US Gen 3 unit from preliminary hardware research. Regional and board revisions may differ.
 
 | Component | Reported specification / status |
 |---|---|
 | SoC | NXP i.MX6 SoloX, Cortex-A9 around 1 GHz; Cortex-M4 coprocessor |
-| RAM / NAND | 512 MB / 512 MB reported; verify on device |
-| Display | 2.08-inch circular color LCD, 480 × 480 |
-| Input | Rotary ring and mechanical push |
+| RAM / NAND | 512168 kB reported by Linux at initial inspection / 512 MiB NAND verified |
+| Display | Circular viewing area; verified framebuffer 480 × 640, virtual 480 × 1280, 32 bpp. Visible-area alignment still being calibrated. |
+| Input | Rotary ring (REL_DIAL) and mechanical push (KEY_ENTER), both verified |
 | Sensors | Temperature, humidity, proximity, motion and ambient light; identify which are in display versus base |
 | Wireless | Wi-Fi, BLE, IEEE 802.15.4; verify usable interfaces |
 | USB | Micro USB, charging and potential recovery/data interface |
@@ -85,8 +101,8 @@ Candidate implementation: C/C++, SDL2 or LVGL depending on available graphics in
 
 | Resource | Relevance |
 |---|---|
-| [Unfr0zen](https://github.com/unfr0zen/unfr0zen) | Community-reported Gen 3 USB rooting, recovery, NAND backup/restore, SSH and custom applications including DOOM. |
-| [Unfr0zen releases](https://github.com/unfr0zen/unfr0zen/releases) | Candidate Windows recovery tooling. |
+| [Unfr0zen](https://github.com/unfr0zen/unfr0zen) | Enabling upstream project; USB recovery, root and SSH verified on our unit. Restore not tested. |
+| [Unfr0zen releases](https://github.com/unfr0zen/unfr0zen/releases) | Windows recovery and setup tooling used successfully (v0.6.0). |
 | [QEMU fork](https://github.com/unfr0zen/qemu) | Candidate Gen 2/3 firmware emulation. |
 | [Buildroot fork](https://github.com/unfr0zen/buildroot) | Embedded Linux build research. |
 | [Fledge discussion](https://www.reddit.com/r/homeassistant/comments/1xsrrmy/fledge_turn_your_nest_learning_thermostat_into_a/) | Reported custom smart-home interface on UK Gen 3; US compatibility and source availability need verification. |
@@ -98,12 +114,14 @@ Community claims are leads, not PuckOS test results. Verify upstream documentati
 
 ## Initial development checklist
 
-- [ ] Record hardware and firmware revision.
-- [ ] Enumerate USB devices before and after connecting display.
-- [ ] Confirm recovery tool compatibility and non-destructive access.
-- [ ] Back up and verify original NAND before persistent writes; keep backups private.
-- [ ] Establish root shell and document partition layout, drivers and services.
-- [ ] Test LCD, rotary ring, push button and sensors.
+- [x] Record hardware and firmware revision.
+- [x] Enumerate USB devices before and after connecting display.
+- [x] Confirm recovery access and successful setup on firmware 6.2-27.
+- [x] Create original NAND backup and verify file checksum; keep backups private.
+- [ ] Resolve initial NAND read warning and validate restore capability.
+- [x] Establish root shell and document partition layout and hardware interfaces.
+- [x] Test LCD rendering, rotary ring and push button.
+- [ ] Validate environmental sensors and beeper.
 - [ ] Investigate baseplate dependency and USB-only operation.
 - [ ] Run standalone Magic 8 Ball proof of concept.
 - [ ] Validate recovery and rollback before distributing any flashable image.
@@ -135,6 +153,8 @@ Root access is not equivalent to arbitrary firmware boot. Bootloader restriction
 
 ## Project status and licensing
 
-Experimental, pre-alpha. No supported installation procedure yet. Do not flash unverified images or publish device-specific backups, credentials or identifiers. Review upstream licenses and comply with applicable GPL obligations before incorporating code. PuckOS is a working name, not affiliated with Google or Nest; formal name clearance and project license selection remain open.
+Experimental, pre-alpha. Development deployment instructions are available, but no supported standalone firmware installation exists. Do not flash unverified images or publish device-specific backups, credentials or identifiers.
+
+Original PuckOS software is licensed under the [MIT License](LICENSE). The independently distributed unfr0zen project is licensed under [GPL-3.0](https://github.com/unfr0zen/unfr0zen/blob/main/LICENSE). Use of its tools does not relicense independent PuckOS applications. Any future incorporation or redistribution of covered third-party code must preserve applicable notices and satisfy its license obligations. No factory firmware images or device backups are intended for distribution. Formal project name clearance remains open.
 
 Suggested repository topics: embedded-linux, nest-thermostat, custom-firmware, reverse-engineering, buildroot, iot, home-automation, retro-gaming, hardware-reuse, puckos.
